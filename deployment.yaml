@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: todo-app
+  name: todo-app-deployment
   labels:
     app: todo-app
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: todo-app
@@ -16,9 +16,16 @@ spec:
     spec:
       containers:
       - name: todo-app-container
-        image: YOUR_DOCKER_IMAGE:latest # Replace with your Docker image
+        image: todo-taskapp:latest # Use your private repository name
         ports:
         - containerPort: 8081
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          value: "prod" # Optional: Set active Spring Boot profile
+      imagePullSecrets:
+      - name: dockerhub-secret # Reference the secret created for Docker Hub
+
+
+# kubectl create secret docker-registry dockerhub-secret \
+#   --docker-server=https://index.docker.io/v1/ \
+#   --docker-username=<your-docker-username> \
+#   --docker-password=<your-docker-password> \
+#   --docker-email=<your-email>
+
