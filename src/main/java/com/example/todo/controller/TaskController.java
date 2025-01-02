@@ -1,57 +1,59 @@
 package com.example.todo.controller;
 
-import com.example.todo.dto.TaskDTO;
+import com.example.todo.model.Task;
 import com.example.todo.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
-import java.util.List;
 
-@RestController
-@RequestMapping("/api/tasks")
+@Controller
+@RequestMapping("/tasks")
 public class TaskController {
 
     @Autowired
     private TaskService taskService;
 
-    // Fetch all tasks
     @GetMapping
-    public List<TaskDTO> getAllTasks() {
-        return taskService.getAllTasks();
+    public String getAllTasks(Model model) {
+        model.addAttribute("tasks", taskService.getAllTasks());
+        return "index";
     }
 
-    // Add a new task
-    @PostMapping
-    public TaskDTO addTask(@RequestBody TaskDTO taskDTO) {
-        return taskService.addTask(
-            taskDTO.getDescription(),
-            taskDTO.getPriority(),
-            LocalDate.parse(taskDTO.getDueDate())
-        );
+    @GetMapping("/add")
+    public String showAddTaskForm() {
+        return "add-task";
     }
 
-    // Edit an existing task
-    @PutMapping("/{id}")
-    public TaskDTO editTask(@PathVariable int id, @RequestBody TaskDTO taskDTO) {
-        taskService.updateTask(
-            id,
-            taskDTO.getDescription(),
-            taskDTO.isCompleted(),
-            taskDTO.getPriority(),
-            LocalDate.parse(taskDTO.getDueDate())
-        );
-        return taskDTO;
+    @PostMapping("/add")
+    public String addTask(@RequestParam String description, @RequestParam String priority, @RequestParam String dueDate) {
+        taskService.addTask(description, priority, LocalDate.parse(dueDate));
+        return "redirect:/tasks";
     }
 
-    // Delete a task
-    @DeleteMapping("/{id}")
-    public void deleteTask(@PathVariable int id) {
+    @GetMapping("/edit/{id}")
+    public String showEditTaskForm(@PathVariable int id, Model model) {
+        model.addAttribute("task", taskService.getTaskById(id));
+        return "edit-task";
+    }
+
+    @PostMapping("/edit")
+    public String editTask(@RequestParam int id, @RequestParam String description, @RequestParam boolean completed,
+                           @RequestParam String priority, @RequestParam String dueDate) {
+        taskService.updateTask(id, description, completed, priority, LocalDate.parse(dueDate));
+        return "redirect:/tasks";
+    }
+
+    @GetMapping("/delete/{id}")
+    public String deleteTask(@PathVariable int id) {
         taskService.deleteTask(id);
+        return "redirect:/tasks";
     }
 
-    // Search tasks
-    @GetMapping("/search")
-    public List<TaskDTO> searchTasks(@RequestParam String query) {
-        return taskService.searchTasks(query);
+    @PostMapping("/search")
+    public String searchTasks(@RequestParam String query, Model model) {
+        model.addAttribute("tasks", taskService.searchTasks(query));
+        return "index";
     }
 }
