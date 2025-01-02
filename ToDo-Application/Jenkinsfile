@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "your-dockerhub-username/my-maven-app"
+        DOCKER_IMAGE = "sudheer99123/todo-taskapp"
         DOCKER_TAG = "latest"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'master', url: 'https://github.com/your-github-repo-url.git'
+                git branch: 'master', url: 'https://github.com/sudheer-nuvepro/java_app.git'
             }
         }
 
@@ -40,9 +40,9 @@ pipeline {
         stage('Deploy Docker Container') {
             steps {
                 sh '''
-                    docker stop my-maven-app || true
-                    docker rm my-maven-app || true
-                    docker run -d -p 8081:8081 --name my-maven-app ${DOCKER_IMAGE}:${DOCKER_TAG}
+                    docker stop todo-taskapp || true
+                    docker rm todo-taskapp || true
+                    docker run -d -p 8081:8081 --name todo-taskapp ${DOCKER_IMAGE}:${DOCKER_TAG}
                 '''
             }
         }
