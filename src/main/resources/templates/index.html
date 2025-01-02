@@ -1,91 +1,67 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <title>Task List</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
-        h1 { color: #333; text-align: center; }
-        .task-list { max-width: 600px; margin: 20px auto; }
-        .task { padding: 15px; margin: 10px 0; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
-        .completed { background-color: #d4edda; border-left: 5px solid #28a745; text-decoration: line-through; }
-        .incomplete { background-color: #f8d7da; border-left: 5px solid #dc3545; }
-        a, button { margin-left: 10px; }
-        a { text-decoration: none; color: #007bff; }
-        a:hover { text-decoration: underline; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .task-list {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .task {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .completed {
+            background-color: #d4edda;
+            border-left: 5px solid #28a745;
+            text-decoration: line-through;
+        }
+        .incomplete {
+            background-color: #f8d7da;
+            border-left: 5px solid #dc3545;
+        }
+        a {
+            text-decoration: none;
+            color: #007bff;
+            margin-left: 10px;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
     </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const taskList = document.querySelector('.task-list');
-            const addTaskBtn = document.querySelector('#add-task-btn');
-            const taskDescriptionInput = document.querySelector('#task-desc');
-
-            // Fetch tasks
-            async function fetchTasks() {
-                const response = await fetch('/api/tasks');
-                const tasks = await response.json();
-                renderTasks(tasks);
-            }
-
-            // Render tasks dynamically
-            function renderTasks(tasks) {
-                taskList.innerHTML = '';
-                tasks.forEach(task => {
-                    const taskDiv = document.createElement('div');
-                    taskDiv.className = `task ${task.completed ? 'completed' : 'incomplete'}`;
-                    taskDiv.innerHTML = `
-                        <span>${task.description}</span>
-                        <div>
-                            <button onclick="markComplete(${task.id}, ${!task.completed})">${task.completed ? 'Mark Incomplete' : 'Mark Complete'}</button>
-                            <button onclick="deleteTask(${task.id})">Delete</button>
-                        </div>
-                    `;
-                    taskList.appendChild(taskDiv);
-                });
-            }
-
-            // Add new task
-            async function addTask() {
-                const description = taskDescriptionInput.value.trim();
-                if (!description) return alert('Task description cannot be empty.');
-                const response = await fetch('/api/tasks', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ description })
-                });
-                if (response.ok) {
-                    taskDescriptionInput.value = '';
-                    fetchTasks();
-                }
-            }
-
-            // Mark task as complete/incomplete
-            async function markComplete(id, completed) {
-                await fetch(`/api/tasks/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ completed })
-                });
-                fetchTasks();
-            }
-
-            // Delete task
-            async function deleteTask(id) {
-                await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
-                fetchTasks();
-            }
-
-            // Event Listeners
-            addTaskBtn.addEventListener('click', addTask);
-
-            // Initial load
-            fetchTasks();
-        });
-    </script>
 </head>
 <body>
-    <h1>Task List</h1>
-    <div class="task-list"></div>
-    <input type="text" id="task-desc" placeholder="Enter task description">
-    <button id="add-task-btn">Add Task</button>
+<h1>Task List</h1>
+
+<!-- Search Bar -->
+<form action="/tasks/search" method="post" style="text-align: center; margin-bottom: 20px;">
+    <input type="text" name="query" placeholder="Search tasks" required>
+    <button type="submit">Search</button>
+</form>
+
+<div class="task-list">
+    <div th:each="task : ${tasks}" th:classappend="${task.completed} ? 'completed' : 'incomplete'" class="task">
+        <span th:text="${task.description}"></span>
+        <span>Priority: <span th:text="${task.priority}"></span></span>
+        <div>
+            <a th:href="@{/tasks/edit/{id}(id=${task.id})}">Edit</a>
+            <a th:href="@{/tasks/delete/{id}(id=${task.id})}">Delete</a>
+        </div>
+    </div>
+</div>
+<a href="/tasks/add" style="display: block; text-align: center; margin-top: 20px;">Add New Task</a>
 </body>
 </html>
