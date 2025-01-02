@@ -1,6 +1,6 @@
 # Step 1: Build the Spring Boot application
 # Use an official Maven image to build the application
-FROM maven:3.9.9-openjdk-17-slim AS build
+FROM maven:3.9.9-eclipse-temurin-17 AS build
 
 # Set the working directory
 WORKDIR /app
@@ -20,10 +20,10 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # Copy the compiled jar file from the build stage
-COPY --from=build /app/target/your-project-name-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /app/target/ToDo-Application-0.0.1-SNAPSHOT.jar app.jar
 
 # Expose the port the application will run on
-EXPOSE 8080
+EXPOSE 8081
 
 # Command to run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
